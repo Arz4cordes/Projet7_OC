@@ -41,7 +41,10 @@ class Combinations:
             text += " " + element
         text += "\n Coût total: " + str(self.total_cost)
         text += "\n Recette: " + str(self.total_recipe)
+        the_profit = self.total_recipe - self.total_cost
+        text += "\n Benefice total: " + str(the_profit)
         return print(text)
+
 
 # test: afficher toutes les combinaisons, budget illimité
 # print("\n AFFICHAGE DE TOUTES LES COMBINAISONS \n")
@@ -114,8 +117,8 @@ for i in range(n):
             the_recipe = 0
         else:
             element = "A" + str(i+1)
-            the_cost = Stocks.stocks_list[i - 1].cost
-            the_recipe = Stocks.stocks_list[i - 1].recipe
+            the_cost = Stocks.stocks_list[i].cost
+            the_recipe = Stocks.stocks_list[i].recipe
         for k in range(2 ** (n - i)):
             Combinations.combinations_list[c].elements.append(element)
             Combinations.combinations_list[c].total_cost += the_cost
