@@ -97,7 +97,7 @@ def greedy_algorithm(total_budget, list_of_stocks):
     #       ajouter le coût au coût embarqué
     #       ajouter la recette au benef total
     # Afficher la combinaison retenue, le coût total et le benef total
-    starting_time = time()
+    starting_time = math.floor(time() * 1000)
     stocks_by_efficiency = sorted(list_of_stocks,
                                   key=lambda stock: stock.efficiency,
                                   reverse=True)
@@ -111,8 +111,11 @@ def greedy_algorithm(total_budget, list_of_stocks):
             greedy_combinaison.append(stock)
             loaded_costs += stock.cost
             total_recipe += stock.recipe
-    ending_time = time()
-    delay = ending_time - starting_time
+    ending_time = math.floor(time() * 1000)
+    duration = ending_time - starting_time
+    f = math.floor(duration / 1000)
+    d = duration - f * 1000
+    delay = str(f) + "." + str(d)
     return greedy_combinaison, loaded_costs, total_recipe, delay
 
 
@@ -120,9 +123,10 @@ def greedy_display(greedy_combinaison, loaded_costs, total_recipe, delay):
     print("Voici la combinaison retenue (algorithme glouton): ")
     for stock in greedy_combinaison:
         print(stock.name)
+    the_benefice = math.floor(1000 * (total_recipe - loaded_costs)) / 1000
     print("Le coût total vaut alors " + str(loaded_costs))
     print("La recette totale vaut: " + str(total_recipe))
-    print("Le bénéfice total vaut: " + str(total_recipe - loaded_costs))
+    print("Le bénéfice total vaut: " + str(the_benefice))
     print("Programme effectué en " + str(delay) + " secondes")
 
 
@@ -154,7 +158,7 @@ def dynamic_programming(number_of_stocks, total_budget, list_of_stocks):
     #           nommons stock_to_load la somme actual_recipe + left_above
     #           ajouter dans la liste [j] de recipe_tabular
     #           le max entre value_above et stock_to_load
-    starting_time = time()
+    starting_time = math.floor(time() * 1000)
     recipe_tabular = []
     # First line of the dataframe
     recipe_tabular.append([])
@@ -179,9 +183,13 @@ def dynamic_programming(number_of_stocks, total_budget, list_of_stocks):
                 recipe_to_load = list_of_stocks[j].recipe
                 stock_to_load = recipe_to_load + left_above
                 m = max(stock_to_load, value_above)
+                m = math.floor(1000 * m) / 1000
                 recipe_tabular[j].append(m)
-    ending_time = time()
-    delay = starting_time - ending_time
+    ending_time = math.floor(time() * 1000)
+    duration = ending_time - starting_time
+    f = math.floor(duration / 1000)
+    d = duration - f * 1000
+    delay = str(f) + "." + str(d)
     return recipe_tabular, delay
 
 

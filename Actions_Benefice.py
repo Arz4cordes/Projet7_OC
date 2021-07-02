@@ -1,5 +1,6 @@
 # solution force brute avec parcours de toutes les combinaisons
 from time import time
+import math
 # Classe action
 # init avec nom, cout et benefice
 # statut achetee ou non (false par defaut)
@@ -18,7 +19,7 @@ class Stocks:
         self.cost = cost
         self.benefit = benefit
         self.bought = False
-        self.recipe = cost * (1 + benefit / 100)
+        self.recipe = math.floor(1000 * cost * (1 + benefit / 100)) / 1000
         return Stocks.stocks_list.append(self)
 
 
@@ -41,7 +42,8 @@ class Combinations:
             text += " " + element
         text += "\n Coût total: " + str(self.total_cost)
         text += "\n Recette: " + str(self.total_recipe)
-        the_profit = self.total_recipe - self.total_cost
+        the_profit = math.floor(1000 * (self.total_recipe - self.total_cost))
+        the_profit = the_profit / 1000
         text += "\n Benefice total: " + str(the_profit)
         return print(text)
 
@@ -84,17 +86,17 @@ stock19 = Stocks("Action-19", 24, 21)
 stock20 = Stocks("Action-20", 114, 18)
 # Affichage des différentes actions et du nombre total de combinaison
 for stock in Stocks.stocks_list:
-    stocks_display = stock.name + " coût" + str(stock.cost)
-    stocks_display += " pourcentage benefice: " + str(stock.benefit)
-    stocks_display += " recette: " + str(stock.recipe)
+    stocks_display = stock.name + " Coût: " + str(stock.cost)
+    stocks_display += " Pourcentage benefice: " + str(stock.benefit)
+    stocks_display += " Recette: " + str(stock.recipe)
     print(stocks_display)
 n = len(Stocks.stocks_list)
 p = 2 ** n
-print(f"il y a {n} actions dans la liste,")
+print(f"Il y a {n} actions dans la liste,")
 print(f"et {p} combinaisons possibles avec budget illimité")
 # boucle i allant de 1 à p
 #   initier les combinaisons avec le numéro i
-starting_time = time()
+starting_time = math.floor(time() * 1000)
 for i in range(p):
     combination = Combinations(i, [])
 # Création de toutes les combianaisons possibles:
@@ -136,8 +138,11 @@ for combination in Combinations.combinations_list:
         best_offer = combination.gain
         a = i
     i += 1
-ending_time = time()
-delay = ending_time - starting_time
+ending_time = math.floor(time() * 1000)
+duration = ending_time - starting_time
+f = math.floor(duration / 1000)
+d = duration - f * 1000
+delay = str(f) + "." + str(d) + " secondes"
 print("\n Nombre total de combinaisons: ")
 print(len(Combinations.combinations_list))
 print("\n Meilleur offre: ")
