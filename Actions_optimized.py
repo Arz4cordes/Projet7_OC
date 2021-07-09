@@ -50,7 +50,7 @@ class Stock:
         self.efficiency = self.recipe / self.cost
 
 
-# Entrée des différentes actions et du budget total
+# Entrée des différentes actions
 def five_stocks():
     list_of_five_stocks = Stocks("Liste de 5 actions")
     list_of_five_stocks.create_stock("Action-1", 12, 25)
