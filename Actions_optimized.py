@@ -54,10 +54,10 @@ class Stock:
 def five_stocks():
     list_of_five_stocks = Stocks("Liste de 5 actions")
     list_of_five_stocks.create_stock("Action-1", 12, 25)
-    list_of_five_stocks.create_stock("Action-2",	2,	150)
-    list_of_five_stocks.create_stock("Action-3",	1,	200)
-    list_of_five_stocks.create_stock("Action-4",	2,	100)
-    list_of_five_stocks.create_stock("Action-5",	4,	150)
+    list_of_five_stocks.create_stock("Action-2", 2,	150)
+    list_of_five_stocks.create_stock("Action-3", 1,	200)
+    list_of_five_stocks.create_stock("Action-4", 2,	100)
+    list_of_five_stocks.create_stock("Action-5", 4,	150)
     return list_of_five_stocks
 
 
@@ -193,13 +193,77 @@ def dynamic_programming(number_of_stocks, total_budget, list_of_stocks):
     return recipe_tabular, delay
 
 
-def dynamic_prog_display(recipe_tabular, num_of_stocks, total_budget, delay):
+def dynamic_prog_display(recipe_tabular, solution, delay):
     # Afficher l'élément recipe_tabular[n-1][w], la recette totale
     for line in recipe_tabular:
         print(line)
+    total_recipe = 0
+    total_cost = 0
+    for stock in solution:
+        total_cost += stock.cost
+        total_recipe += stock.recipe
+    print("Voici le coût total: ")
+    print(total_cost)
     print("Voici la recette totale obtenue: ")
-    print(recipe_tabular[num_of_stocks - 1][total_budget])
+    print(total_recipe)
+    print("Le bénéfice vaut: " + str(total_recipe - total_cost))
     print("Programme effectué en " + str(delay) + " secondes")
+
+
+def finding_solution(recipe_tabular, list_stocks, num_of_stocks, total_budget):
+    """ :param: recipe tabular is the tabular made by dynamic programming
+                list_stocks is a list of objects from the class Stock
+                num_of_stocks is the length of list_of_stocks
+                total_budget is an integer, the limit for costs
+    """
+    # Remontée du tableau pour la programmation dynamique
+    # recette actuelle valeur v
+    # différence diff
+    # rang k = poids limite
+    # solution: une liste d'actions sélectionnées, soluce = []
+    # i = n - 1 (n: nb total d'actions) et k = poids limite
+    # Tant que v différent de 0 et i supérieur ou égal à 0
+    #   Si la valeur tab[i][j] = tab[i - 1][j]:
+    #       alors remonter d'une ligne: i descend de 1
+    #       ligne ok
+    #   Sinon:
+    #   j = k
+    #   Tant que ligne non ok et j supérieur ou égal à 0
+    #       diff = tab[i][k] - tab[i][j]
+    #       si diff = recette[i]
+    #           alors ligne ok
+    #           ajouter l'action[i] à la solution
+    #           k = j et v = tab[i][j]
+    #       enlever 1 à j
+    #   enlever 1 à i
+
+    i = num_of_stocks - 1
+    j = total_budget
+    v = recipe_tabular[i][j]
+    solution = []
+    while v != 0 and i >= 0:
+        print("Traitement action n°" + str(i+1))
+        line_done = False
+        if i != 0:
+            if recipe_tabular[i][j] == recipe_tabular[i - 1][j]:
+                line_done = True
+                i -= 1
+        while not line_done and j >= 0:
+            diff = v - recipe_tabular[i][j]
+            print("comparaison des valeurs ")
+            print(str(v) + " et " + str(recipe_tabular[i][j]))
+            print("pour les indices ligne " + str(i) + " colonne " + str(j))
+            if diff == list_stocks[i].recipe:
+                line_done = True
+                print("j'ajoute l'action n°" + str(i + 1))
+                solution.append(list_stocks[i])
+                v = recipe_tabular[i][j]
+                print("valeur actuelle: " + str(v))
+                print("indice i: " + str(i) + " et indice j: " + str(j))
+            else:
+                j -= 1
+        i -= 1
+    return solution
 
 
 def main():
@@ -221,7 +285,8 @@ def main():
         text += "pour la solution en programmation dynamique avec 5 actions: "
         answer = input(text)
     a_tabular, delay = dynamic_programming(num_of_stocks, budget, list_stocks)
-    dynamic_prog_display(a_tabular, num_of_stocks, budget, delay)
+    solution = finding_solution(a_tabular, list_stocks, num_of_stocks, budget)
+    dynamic_prog_display(a_tabular, solution, delay)
     # Solutions pour 20 actions OC
     answer = "Hello world"
     while answer != "":
@@ -240,7 +305,8 @@ def main():
         text += "pour la solution en programmation dynamique avec 20 actions: "
         answer = input(text)
     a_tabular, delay = dynamic_programming(num_of_stocks, budget, list_stocks)
-    dynamic_prog_display(a_tabular, num_of_stocks, budget, delay)
+    solution = finding_solution(a_tabular, list_stocks, num_of_stocks, budget)
+    dynamic_prog_display(a_tabular, solution, delay)
 
 
 if __name__ == "__main__":
