@@ -25,9 +25,9 @@ class Stocks:
     def display(self):
         # Affichage des différentes actions et du nombre total de combinaison
         for stock in self.stocks_list:
-            stocks_display = stock.name + " coût" + str(stock.cost)
+            stocks_display = stock.name + " coût" + str(stock.cost/digits)
             stocks_display += " pourcentage benefice: " + str(stock.benefit)
-            stocks_display += " recette: " + str(stock.recipe)
+            stocks_display += " recette: " + str(stock.recipe/digits)
             stocks_display += "\n efficacité: " + str(stock.efficiency)
             print(stocks_display)
         n = len(self.stocks_list)
@@ -43,11 +43,15 @@ class Stock:
 
     def __init__(self, name, cost, benefit):
         self.name = name
-        self.cost = cost
+        print(self.name)
+        self.cost = digits * cost
+        print(self.cost)
         self.benefit = benefit
         self.bought = False
-        self.recipe = math.floor(1000 * cost * (1 + benefit / 100)) / 1000
-        self.efficiency = self.recipe / self.cost
+        self.recipe = math.floor(self.cost * (1 + benefit / 100))
+        print(self.recipe)
+        self.efficiency = math.floor(self.recipe / self.cost * 1000) / 1000
+        print(self.efficiency)
 
 
 # Entrée des différentes actions
@@ -97,12 +101,10 @@ def greedy_algorithm(total_budget, list_of_stocks):
     #       ajouter le coût au coût embarqué
     #       ajouter la recette au benef total
     # Afficher la combinaison retenue, le coût total et le benef total
-    starting_time = math.floor(time() * 1000)
+    starting_time = math.floor(time() * 10000)
     stocks_by_efficiency = sorted(list_of_stocks,
                                   key=lambda stock: stock.efficiency,
                                   reverse=True)
-    for stock in stocks_by_efficiency:
-        print(stock.name + str(stock.recipe))
     greedy_combinaison = []
     loaded_costs = 0
     total_recipe = 0
@@ -111,10 +113,10 @@ def greedy_algorithm(total_budget, list_of_stocks):
             greedy_combinaison.append(stock)
             loaded_costs += stock.cost
             total_recipe += stock.recipe
-    ending_time = math.floor(time() * 1000)
+    ending_time = math.floor(time() * 10000)
     duration = ending_time - starting_time
-    f = math.floor(duration / 1000)
-    d = duration - f * 1000
+    f = math.floor(duration / 10000)
+    d = duration - f * 10000
     delay = str(f) + "." + str(d)
     return greedy_combinaison, loaded_costs, total_recipe, delay
 
@@ -123,15 +125,15 @@ def greedy_display(greedy_combinaison, loaded_costs, total_recipe, delay):
     print("Voici la combinaison retenue (algorithme glouton): ")
     for stock in greedy_combinaison:
         print(stock.name)
-    the_benefice = math.floor(1000 * (total_recipe - loaded_costs)) / 1000
-    print("Le coût total vaut alors " + str(loaded_costs))
-    print("La recette totale vaut: " + str(total_recipe))
-    print("Le bénéfice total vaut: " + str(the_benefice))
+    the_benefice = (total_recipe - loaded_costs)
+    print("Le coût total vaut alors " + str(loaded_costs / digits))
+    print("La recette totale vaut: " + str(total_recipe / digits))
+    print("Le bénéfice total vaut: " + str(the_benefice / digits))
     print("Programme effectué en " + str(delay) + " secondes")
 
 
 # PROGRAMMATION DYNAMIQUE
-def dynamic_programming(number_of_stocks, total_budget, list_of_stocks):
+def dynamic_programming(number_of_stocks, total_budget, list_stocks):
     # n nombre total d'actions
     # w coût maximum (nombre entier)
     # recipe_tabular est le tableau qui présente les recettes
@@ -158,55 +160,58 @@ def dynamic_programming(number_of_stocks, total_budget, list_of_stocks):
     #           nommons stock_to_load la somme actual_recipe + left_above
     #           ajouter dans la liste [j] de recipe_tabular
     #           le max entre value_above et stock_to_load
-    starting_time = math.floor(time() * 1000)
+    starting_time = math.floor(time() * 10000)
     recipe_tabular = []
+    total_weight = int(total_budget / digits)
     # First line of the dataframe
     recipe_tabular.append([])
-    for i in range(total_budget + 1):
-        if list_of_stocks[0].cost > i:
+    for j in range(total_weight + 1):
+        actual_cost = int(list_stocks[0].cost / digits)
+        if actual_cost > j:
             recipe_tabular[0].append(0)
         else:
-            recipe_tabular[0].append(list_of_stocks[0].recipe)
+            recipe_tabular[0].append(list_stocks[0].recipe)
     # Complete the dataframe of recipes get
-    for j in range(1, number_of_stocks):
+    for i in range(1, number_of_stocks):
         recipe_tabular.append([])
-        text = "Traitement de l'action numéro " + str(j + 1)
-        text += " , valeur " + str(list_of_stocks[j].recipe)
-        print(text)
-        for i in range(total_budget + 1):
-            value_above = recipe_tabular[j - 1][i]
-            if list_of_stocks[j].cost > i:
-                recipe_tabular[j].append(value_above)
+        for j in range(total_weight + 1):
+            value_above = recipe_tabular[i - 1][j]
+            actual_cost = int(list_stocks[i].cost / digits)
+            if actual_cost > j:
+                recipe_tabular[i].append(value_above)
             else:
-                diff = i - list_of_stocks[j].cost
-                left_above = recipe_tabular[j - 1][diff]
-                recipe_to_load = list_of_stocks[j].recipe
+                diff = j - actual_cost
+                left_above = recipe_tabular[i - 1][diff]
+                recipe_to_load = list_stocks[i].recipe
                 stock_to_load = recipe_to_load + left_above
                 m = max(stock_to_load, value_above)
-                m = math.floor(1000 * m) / 1000
-                recipe_tabular[j].append(m)
-    ending_time = math.floor(time() * 1000)
+                recipe_tabular[i].append(m)
+    ending_time = math.floor(time() * 10000)
     duration = ending_time - starting_time
-    f = math.floor(duration / 1000)
-    d = duration - f * 1000
+    f = math.floor(duration / 10000)
+    d = duration - f * 10000
     delay = str(f) + "." + str(d)
     return recipe_tabular, delay
 
 
 def dynamic_prog_display(recipe_tabular, solution, delay):
     # Afficher l'élément recipe_tabular[n-1][w], la recette totale
+    i = 1
     for line in recipe_tabular:
+        print(f"\n Action n° {i}")
         print(line)
+        i += 1
     total_recipe = 0
     total_cost = 0
     for stock in solution:
         total_cost += stock.cost
         total_recipe += stock.recipe
     print("Voici le coût total: ")
-    print(total_cost)
+    print(int(total_cost / digits))
     print("Voici la recette totale obtenue: ")
-    print(total_recipe)
-    print("Le bénéfice vaut: " + str(total_recipe - total_cost))
+    print(int(total_recipe / digits))
+    the_benefice = total_recipe - total_cost
+    print("Le bénéfice vaut: " + str(the_benefice / digits))
     print("Programme effectué en " + str(delay) + " secondes")
 
 
@@ -217,53 +222,41 @@ def finding_solution(recipe_tabular, list_stocks, num_of_stocks, total_budget):
                 total_budget is an integer, the limit for costs
     """
     # Remontée du tableau pour la programmation dynamique
-    # recette actuelle valeur v
-    # différence diff
-    # rang k = poids limite
-    # solution: une liste d'actions sélectionnées, soluce = []
-    # i = n - 1 (n: nb total d'actions) et k = poids limite
-    # Tant que v différent de 0 et i supérieur ou égal à 0
-    #   Si la valeur tab[i][j] = tab[i - 1][j]:
-    #       alors remonter d'une ligne: i descend de 1
-    #       ligne ok
-    #   Sinon:
-    #   j = k
-    #   Tant que ligne non ok et j supérieur ou égal à 0
-    #       diff = tab[i][k] - tab[i][j]
-    #       si diff = recette[i]
-    #           alors ligne ok
-    #           ajouter l'action[i] à la solution
-    #           k = j et v = tab[i][j]
-    #       enlever 1 à j
-    #   enlever 1 à i
-
+    # on part de i = nombre d'actions - 1
+    # on part de j = w poids limite
+    # recette actuelle v = tab [i][j]
+    # Tant que i est supérieur ou égal à 0 et v différent de 0:
+    #   si v = tab[i-1][j] (pour i différent de 0 !!)
+    #       alors on remonte d'une ligne: i devient i - 1
+    #   sinon:
+    #       l'action i est prise
+    #       j devient j - poids de l'action i
+    #       i devient i - 1
+    #       v devient tab[i][j]
+    total_weight = int(total_budget / digits)
     i = num_of_stocks - 1
-    j = total_budget
+    j = total_weight
     v = recipe_tabular[i][j]
     solution = []
-    while v != 0 and i >= 0:
+    while v != 0 and i > 0:
         print("Traitement action n°" + str(i+1))
-        line_done = False
-        if i != 0:
-            if recipe_tabular[i][j] == recipe_tabular[i - 1][j]:
-                line_done = True
-                i -= 1
-        while not line_done and j >= 0:
-            diff = v - recipe_tabular[i][j]
-            print("comparaison des valeurs ")
-            print(str(v) + " et " + str(recipe_tabular[i][j]))
-            print("pour les indices ligne " + str(i) + " colonne " + str(j))
-            if diff == list_stocks[i].recipe:
-                line_done = True
-                print("j'ajoute l'action n°" + str(i + 1))
-                solution.append(list_stocks[i])
-                v = recipe_tabular[i][j]
-                print("valeur actuelle: " + str(v))
-                print("indice i: " + str(i) + " et indice j: " + str(j))
-            else:
-                j -= 1
-        i -= 1
+        if v == recipe_tabular[i - 1][j]:
+            i -= 1
+        else:
+            actual_cost = int(list_stocks[i].cost / digits)
+            j = j - actual_cost
+            solution.append(list_stocks[i])
+            i -= 1
+            v = recipe_tabular[i][j]
+    if i == 0 and v != 0:
+        solution.append(list_stocks[0])
+    print("\n Voici les actions retenues:")
+    for item in solution:
+        print(item.name)
     return solution
+
+
+digits = 1000
 
 
 def main():
@@ -276,7 +269,7 @@ def main():
     the_stocks = five_stocks()
     list_stocks = the_stocks.stocks_list
     num_of_stocks = len(list_stocks)
-    budget = 15
+    budget = 15 * digits
     combi, load_costs, recipe, delay = greedy_algorithm(budget, list_stocks)
     greedy_display(combi, load_costs, recipe, delay)
     answer = "Hello world"
@@ -296,7 +289,7 @@ def main():
     the_stocks = twenty_stocks()
     list_stocks = the_stocks.stocks_list
     num_of_stocks = len(list_stocks)
-    budget = 500
+    budget = 500 * digits
     combi, load_costs, recipe, delay = greedy_algorithm(budget, list_stocks)
     greedy_display(combi, load_costs, recipe, delay)
     answer = "Hello world"
