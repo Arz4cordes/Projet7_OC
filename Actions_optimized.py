@@ -2,6 +2,7 @@
 # puis en programmation dynamique
 from time import time
 import math
+import csv
 # Classe action
 # init avec nom, cout et benefice
 # statut achetee ou non (false par defaut)
@@ -38,15 +39,19 @@ class Stocks:
 
 class Stock:
     """ actions we can bought
+    self.cost is transformed to an integer, digits times the entry
+    self.benefit is a float, with 3 digits after point
+    self.recipe is an integer, calculate with cost and benefit
+    self.efficiency is a float, with 3 digits after point
     :param: name (type: string), cost (type:float), benefit (type: float)
     """
 
     def __init__(self, name, cost, benefit):
         self.name = name
         print(self.name)
-        self.cost = digits * cost
+        self.cost = int(digits * cost)
         print(self.cost)
-        self.benefit = benefit
+        self.benefit = math.floor(1000 * benefit) / 1000
         self.bought = False
         self.recipe = math.floor(self.cost * (1 + benefit / 100))
         print(self.recipe)
@@ -88,6 +93,30 @@ def twenty_stocks():
     list_twenty_stocks.create_stock("Action-19", 24, 21)
     list_twenty_stocks.create_stock("Action-20", 114, 18)
     return list_twenty_stocks
+
+
+def dataset_stocks(a_name):
+    list_dataset_stocks = Stocks(a_name)
+    file_path = 'Datasets/' + a_name + '.csv'
+    with open(file_path, newline='') as csvfile:
+        data_reader = csv.reader(csvfile, delimiter=' ', quotechar=',')
+        r = 0
+        for row in data_reader:
+            if r != 0:
+                informations = row[0].split(',')
+                try:
+                    stock_name = informations[0].replace('Share-', '')
+                    stock_cost = int(float(informations[1]))
+                    stock_benefice = int(float(informations[2]))
+                    if stock_cost > 0 and stock_benefice > 0:
+                        list_dataset_stocks.create_stock(stock_name, stock_cost, stock_benefice)
+                    else:
+                        print(f"Ligne {r} non prise en compte, le coût ou le bénéfice sont negatifs ou nul")
+                except Exception as e:
+                    print(f"Problème de lecture dans la ligne {r} du csv")
+                    print(e)
+            r += 1
+    return list_dataset_stocks
 
 
 def greedy_algorithm(total_budget, list_of_stocks):
@@ -165,27 +194,37 @@ def dynamic_programming(number_of_stocks, total_budget, list_stocks):
     total_weight = int(total_budget / digits)
     # First line of the dataframe
     recipe_tabular.append([])
-    for j in range(total_weight + 1):
-        actual_cost = int(list_stocks[0].cost / digits)
-        if actual_cost > j:
-            recipe_tabular[0].append(0)
-        else:
-            recipe_tabular[0].append(list_stocks[0].recipe)
-    # Complete the dataframe of recipes get
-    for i in range(1, number_of_stocks):
-        recipe_tabular.append([])
+    try:
         for j in range(total_weight + 1):
-            value_above = recipe_tabular[i - 1][j]
-            actual_cost = int(list_stocks[i].cost / digits)
+            actual_cost = int(list_stocks[0].cost / digits)
             if actual_cost > j:
-                recipe_tabular[i].append(value_above)
+                recipe_tabular[0].append(0)
             else:
-                diff = j - actual_cost
-                left_above = recipe_tabular[i - 1][diff]
-                recipe_to_load = list_stocks[i].recipe
-                stock_to_load = recipe_to_load + left_above
-                m = max(stock_to_load, value_above)
-                recipe_tabular[i].append(m)
+                recipe_tabular[0].append(list_stocks[0].recipe)
+    except IndexError:
+        print(f"Erreur d'index première ligne, j = {j}")
+    # Complete the dataframe of recipes get
+    try:
+        for i in range(1, number_of_stocks):
+            recipe_tabular.append([])
+            try:
+                for j in range(total_weight + 1):
+                    value_above = recipe_tabular[i - 1][j]
+                    actual_cost = int(list_stocks[i].cost / digits)
+                    if actual_cost > j:
+                        recipe_tabular[i].append(value_above)
+                    else:
+                        diff = j - actual_cost
+                        left_above = recipe_tabular[i - 1][diff]
+                        recipe_to_load = list_stocks[i].recipe
+                        stock_to_load = recipe_to_load + left_above
+                        m = max(stock_to_load, value_above)
+                        recipe_tabular[i].append(m)
+            except IndexError:
+                print(f"Erreur d'index dans la colonne j = {j}, sur la ligne i = {i}")
+                print(f"Valeurs diff {diff}, value above {value_above}, actual cost {actual_cost}, max {m}")
+    except IndexError:
+        print(f"Erreur d'index sur la ligne i = {i}")
     ending_time = math.floor(time() * 10000)
     duration = ending_time - starting_time
     f = math.floor(duration / 10000)
@@ -297,6 +336,18 @@ def main():
         text = "Appuyez sur la touche 'Entrée' "
         text += "pour la solution en programmation dynamique avec 20 actions: "
         answer = input(text)
+    a_tabular, delay = dynamic_programming(num_of_stocks, budget, list_stocks)
+    solution = finding_solution(a_tabular, list_stocks, num_of_stocks, budget)
+    dynamic_prog_display(a_tabular, solution, delay)
+    # recuperation des datasets
+    answer = "Hello world"
+    while answer != "":
+        text = "Appuyez sur la touche 'Entrée' "
+        text += "pour la solution en programmation dynamique avec le dataset 1: "
+        answer = input(text)
+    dataset1_stocks = dataset_stocks('dataset1')
+    list_stocks = dataset1_stocks.stocks_list
+    num_of_stocks = len(list_stocks)
     a_tabular, delay = dynamic_programming(num_of_stocks, budget, list_stocks)
     solution = finding_solution(a_tabular, list_stocks, num_of_stocks, budget)
     dynamic_prog_display(a_tabular, solution, delay)
