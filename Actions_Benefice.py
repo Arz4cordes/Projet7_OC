@@ -1,6 +1,7 @@
 # solution force brute avec parcours de toutes les combinaisons
 from time import time
 import math
+import matplotlib.pyplot as plt
 # Classe action
 # init avec nom, cout et benefice
 # statut achetee ou non (false par defaut)
@@ -206,10 +207,12 @@ the_stocks = five_stocks()
 list_stocks = the_stocks.stocks_list
 num_of_stocks = len(list_stocks)
 total_budget = 15
+# debut de l'algorithme qui cherche la meilleure solution
 starting_time = math.floor(time() * 1000)
 list_of_combinations = all_combinations_studies(num_of_stocks, list_stocks)
 c, best_offer = best_choice_ever(list_of_combinations, total_budget)
 ending_time = math.floor(time() * 1000)
+# fin de l'algorithme qui cherche la meilleure solution
 duration = ending_time - starting_time
 f = math.floor(duration / 1000)
 d = duration - f * 1000
@@ -220,27 +223,55 @@ print("\n Meilleur offre: ")
 list_of_combinations.combinations_list[c].display()
 print("\n Temps écoulé pour calculer la meilleure offre:")
 print(delay)
-# Calcul pour 20 actions:
+# Calcul pour 6 à 20 actions:
+the_stocks = twenty_stocks()
+list_1 = the_stocks.stocks_list
+list_stocks = list_1 + list_1
+num_of_stocks = len(list_stocks)
+total_budget = 500
+n = 12
+stocks_used_numbers = []
+list_of_times = []
 answer = "Hello world"
 while answer != "":
     text = "Appuyez sur la touche 'Entrée' "
-    text += "pour la solution avec 5 actions: "
+    text += f"pour la solution avec 6 à 24 actions: "
     answer = input(text)
-the_stocks = twenty_stocks()
-list_stocks = the_stocks.stocks_list
-num_of_stocks = len(list_stocks)
-total_budget = 500
-starting_time = math.floor(time() * 1000)
-list_of_combinations = all_combinations_studies(num_of_stocks, list_stocks)
-c, best_offer = best_choice_ever(list_of_combinations, total_budget)
-ending_time = math.floor(time() * 1000)
-duration = ending_time - starting_time
-f = math.floor(duration / 1000)
-d = duration - f * 1000
-delay = str(f) + "." + str(d) + " secondes"
-print("\n Nombre total de combinaisons: ")
-print(list_of_combinations.num_of_combinations)
-print("\n Meilleur offre: ")
-list_of_combinations.combinations_list[c].display()
-print("\n Temps écoulé pour calculer la meilleure offre:")
-print(delay)
+while n <= 22:
+    starting_time = math.floor(time() * 1000)
+    list_of_combinations = all_combinations_studies(n, list_stocks)
+    c, best_offer = best_choice_ever(list_of_combinations, total_budget)
+    ending_time = math.floor(time() * 1000)
+    duration = ending_time - starting_time
+    f = math.floor(duration / 1000)
+    d = duration - f * 1000
+    delay = str(f) + "." + str(d) + " secondes"
+    list_of_times.append(delay)
+    stocks_used_numbers.append(n)
+    print(f"Nombre d'actions au départ: {n}")
+    print("\n Nombre total de combinaisons: ")
+    print(list_of_combinations.num_of_combinations)
+    print("\n Meilleur offre: ")
+    list_of_combinations.combinations_list[c].display()
+    print("\n Temps écoulé pour calculer la meilleure offre:")
+    print(delay)
+    n += 1
+# affichage des temps d'éxécution
+print(stocks_used_numbers)
+print(list_of_times)
+while answer != "":
+    text = "Appuyez sur la touche 'Entrée' "
+    text +="pour afficher le graphique. "
+    answer = input(text)
+number_of_stocks = [15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+times_list = [0.2, 0.4, 1, 2, 4.3, 8.6, 18.9, 43.8, 112.3, 1193.4]
+plt.scatter(number_of_stocks, times_list, color='black')
+plt.plot(number_of_stocks, times_list, linestyle='dashed', color='red')
+axis = plt.gca()
+axis.set_xlabel("Nombre d'actions étudiées")
+axis.set_ylabel("Temps d'éxécution en secondes")
+plt.title("Evolution du temps d'éxécution de l'algo force brute")
+plt.xlim(10, 25)
+plt.ylim(-100, 1500)
+plt.grid()
+plt.show()

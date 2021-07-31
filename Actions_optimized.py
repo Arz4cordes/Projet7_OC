@@ -3,6 +3,7 @@
 from time import time
 import math
 import csv
+import matplotlib.pyplot as plt
 # Classe action
 # init avec nom, cout et benefice
 # statut achetee ou non (false par defaut)
@@ -233,13 +234,17 @@ def dynamic_programming(number_of_stocks, total_budget, list_stocks):
     return recipe_tabular, delay
 
 
-def dynamic_prog_display(recipe_tabular, solution, delay):
-    # Afficher l'élément recipe_tabular[n-1][w], la recette totale
+def recipe_tabular_display(recipe_tabular):
+    """ print the recipe's tabular get by dynamic programming"""
     i = 1
     for line in recipe_tabular:
         print(f"\n Action n° {i}")
         print(line)
         i += 1
+
+
+def dynamic_prog_display(recipe_tabular, solution, delay):
+    # Afficher l'élément recipe_tabular[n-1][w], la recette totale
     total_recipe = 0
     total_cost = 0
     for stock in solution:
@@ -278,7 +283,7 @@ def finding_solution(recipe_tabular, list_stocks, num_of_stocks, total_budget):
     v = recipe_tabular[i][j]
     solution = []
     while v != 0 and i > 0:
-        print("Traitement action n°" + str(i+1))
+        # print("Traitement action n°" + str(i+1))
         if v == recipe_tabular[i - 1][j]:
             i -= 1
         else:
@@ -340,18 +345,98 @@ def main():
     solution = finding_solution(a_tabular, list_stocks, num_of_stocks, budget)
     dynamic_prog_display(a_tabular, solution, delay)
     # recuperation des datasets
+    input("Appuyez sur Entrée pour charger les deux datasets")
+    dataset1_stocks = dataset_stocks('dataset1')
+    dataset2_stocks = dataset_stocks('dataset2')
+    # solution greedy pour le dataset1
+    answer = "Hello world"
+    while answer != "":
+        text = "Appuyez sur la touche 'Entrée' "
+        text += "pour la solution greedy avec le dataset 1: "
+        answer = input(text)
+    list_stocks_1 = dataset1_stocks.stocks_list
+    num_of_stocks = len(list_stocks_1)
+    combi, load_costs, recipe, delay = greedy_algorithm(budget, list_stocks_1)
+    greedy_display(combi, load_costs, recipe, delay)
+    # solution en programmtion dynamique pour le dataset 1
     answer = "Hello world"
     while answer != "":
         text = "Appuyez sur la touche 'Entrée' "
         text += "pour la solution en programmation dynamique avec le dataset 1: "
         answer = input(text)
-    dataset1_stocks = dataset_stocks('dataset1')
-    list_stocks = dataset1_stocks.stocks_list
-    num_of_stocks = len(list_stocks)
-    a_tabular, delay = dynamic_programming(num_of_stocks, budget, list_stocks)
-    solution = finding_solution(a_tabular, list_stocks, num_of_stocks, budget)
+    a_tabular, delay = dynamic_programming(num_of_stocks, budget, list_stocks_1)
+    solution = finding_solution(a_tabular, list_stocks_1, num_of_stocks, budget)
     dynamic_prog_display(a_tabular, solution, delay)
-
+    # solution greedy pour le dataset 2
+    answer = "Hello world"
+    while answer != "":
+        text = "Appuyez sur la touche 'Entrée' "
+        text += "pour la solution greedy avec le dataset 2: "
+        answer = input(text)
+    list_stocks_2 = dataset2_stocks.stocks_list
+    num_of_stocks = len(list_stocks_2)
+    combi, load_costs, recipe, delay = greedy_algorithm(budget, list_stocks_2)
+    greedy_display(combi, load_costs, recipe, delay)
+    # solution en programmtation dynamique pour le dataset 2
+    answer = "Hello world"
+    while answer != "":
+        text = "Appuyez sur la touche 'Entrée' "
+        text += "pour la solution en programmation dynamique avec le dataset 2: "
+        answer = input(text)
+    a_tabular, delay = dynamic_programming(num_of_stocks, budget, list_stocks_2)
+    solution = finding_solution(a_tabular, list_stocks_2, num_of_stocks, budget)
+    dynamic_prog_display(a_tabular, solution, delay)
+    # evolution en programmation dynamique
+    list_stocks = list_stocks_1 + list_stocks_2
+    list_stocks_3 = list_stocks
+    list_stocks = list_stocks_3 + list_stocks
+    stocks_used_numbers = []
+    list_of_times = []
+    for i in range(8):
+        list_stocks_3 = list_stocks
+        list_stocks = list_stocks_3 + list_stocks
+        num_of_stocks = len(list_stocks)
+        print(f"Voici la solution en programmation dynamique avec {num_of_stocks} actions: ")
+        a_tabular, delay = dynamic_programming(num_of_stocks, budget, list_stocks)
+        solution = finding_solution(a_tabular, list_stocks, num_of_stocks, budget)
+        dynamic_prog_display(a_tabular, solution, delay)
+        list_of_times.append(delay)
+        stocks_used_numbers.append(num_of_stocks)
+    print(stocks_used_numbers)
+    print(list_of_times)
+    plt.scatter(stocks_used_numbers, list_of_times, color='black')
+    plt.plot(stocks_used_numbers, list_of_times, linestyle='dashed', color='red')
+    axis = plt.gca()
+    axis.set_xlabel("Nombre d'actions étudiées")
+    axis.set_ylabel("Temps d'éxécution en secondes")
+    plt.title("Evolution du temps d'éxécution en programmation dynamique")
+    plt.grid()
+    plt.show()
+    # evolution avec les algo glouton
+    greedy_times_list = []
+    stocks_used_numbers = []
+    for i in range(4):
+        list_stocks_3 = list_stocks
+        list_stocks = list_stocks_3 + list_stocks
+    for i in range(6):
+        list_stocks_3 = list_stocks
+        list_stocks = list_stocks_3 + list_stocks
+        num_of_stocks = len(list_stocks)
+        print(f"Voici la solution greedy avec {num_of_stocks} actions")
+        combi, load_costs, recipe, delay = greedy_algorithm(budget, list_stocks)
+        greedy_display(combi, load_costs, recipe, delay)
+        greedy_times_list.append(delay)
+        stocks_used_numbers.append(num_of_stocks)
+    print(stocks_used_numbers)
+    print(greedy_times_list)
+    plt.scatter(stocks_used_numbers, greedy_times_list, color='black')
+    plt.plot(stocks_used_numbers, greedy_times_list, linestyle='dashed', color='red')
+    axis = plt.gca()
+    axis.set_xlabel("Nombre d'actions étudiées")
+    axis.set_ylabel("Temps d'éxécution en secondes")
+    plt.title("Evolution du temps d'éxécution avec l'algo glouton")
+    plt.grid()
+    plt.show()
 
 if __name__ == "__main__":
     main()
